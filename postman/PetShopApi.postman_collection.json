@@ -334,7 +334,7 @@
               "key": "file",
               "type": "file",
               "uuid": "ba75acbd-992c-4e83-95d6-74890be006cd",
-              "src": "test_image.png"
+              "src": "postman/test_image.png"
             }
           ]
         },
