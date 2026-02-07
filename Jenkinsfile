@@ -1,29 +1,41 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Install Newman') {
+        stage('Setup') {
             steps {
-                sh 'npm install newman'
+                sh 'npm install -g newman newman-reporter-htmlextra'
             }
         }
-
+        
         stage('Run API Tests') {
             steps {
                 sh '''
-                  mkdir -p newman
-                  npx newman run postman/PetShopApi.postman_collection.json \
-                    -e postman/PetShopApi.postman_environment.json \
-                    --reporters cli,junit \
-                    --reporter-junit-export newman/PetShopApi.xml
+                  mkdir -p newman/reports
+                  npx newman run collections/PetShopApi.postman_collection.json \
+                    -e environments/PetShopApi.postman_environment.json \
+                    --reporters cli,junit,htmlextra \
+                    --reporter-junit-export newman/reports/junit-report.xml \
+                    --reporter-htmlextra-export newman/reports/html-report.html
                 '''
             }
         }
     }
-
+    
     post {
         always {
-            junit 'newman/PetShopApi.xml'
+            junit 'newman/reports/junit-report.xml'
+            publishHTML([
+                reportDir: 'newman/reports',
+                reportFiles: 'html-report.html',
+                reportName: 'Newman HTML Report'
+            ])
+        }
+        failure {
+            echo 'Tests failed! Check the reports.'
+        }
+        success {
+            echo 'All tests passed!'
         }
     }
 }
